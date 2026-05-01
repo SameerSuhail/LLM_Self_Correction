@@ -50,7 +50,13 @@ LLM_Self_Correction/
 │   ├── training/               LoRA fine-tuning configs
 │   └── README.md               Stage 2 details (D1, D2, masking scheme)
 │
-├── stage3/                     Stage 3: Training-based code correction (coming soon)
+├── stage3/                     Stage 3: Training-based code correction
+│   ├── configs/                Default hyperparameters (YAML)
+│   ├── scripts/                Training, eval, SLURM, lightweight + upstream data-gen
+│   ├── data/                   Stage 3 training datasets (committed JSONL)
+│   ├── results/                Final JSON outputs + detailed reports
+│   ├── docs/                   E2E reproduction + overview maps
+│   └── README.md               Stage 3 entrypoint → docs/REPRODUCTION.md
 │
 └── README.md                   This file
 ```
@@ -88,10 +94,12 @@ See [`stage2/README.md`](stage2/README.md) for the full data-generation pipeline
 
 ---
 
-## Stage 3 — Training-based code correction (coming soon)
+## Stage 3 — Training-based code correction
 
-`stage3/` (to be added)
+`stage3/`
 
 We adapt the Stage 2 recipe to code: training Qwen-2.5-Coder-7B-Instruct on CodeContests, with a 14B teacher generating self-correction cycles. Unlike Stage 2, Stage 3 uses only the single-step (D1) format, no multi-step retrace, no attribution signal; LoRA at rank 16 targeting all linear projection layers.
 
 Result: regression on every code benchmark (MBPP −10.27, HumanEval −5.87, Codeforces-A −15.22). We attribute this to (1) instruction conflict with an already heavily code-tuned base, (2) low-rank adapter capacity even at r=16, and (3) the existence of an external verifier (compiler + unit tests) that makes intrinsic self-correction supervision redundant where math has no analog.
+
+See [`stage3/README.md`](stage3/README.md) and the end-to-end steps in [`stage3/docs/REPRODUCTION.md`](stage3/docs/REPRODUCTION.md).
