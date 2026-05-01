@@ -1,0 +1,88 @@
+# Correction strategy prompts
+
+# S1 — Simple Review
+s1_simple: |
+  Review your answer carefully. If you find any errors, provide a corrected answer. If your answer is correct, restate it.
+
+  Your previous answer:
+  {response}
+
+# S2 — Structured Critique (task-specific)
+s2_math: |
+  Check each step of your solution carefully:
+  1. Verify each arithmetic calculation is correct.
+  2. Check that each step logically follows from the previous one.
+  3. Recompute your final numerical answer from scratch.
+
+  If you find any errors, provide the corrected solution with the final answer in the format: #### [number]
+  If everything is correct, restate your answer.
+
+  Your previous solution:
+  {response}
+
+s2_factual: |
+  Review your answer:
+  1. Are you confident in each factual claim you made?
+  2. Could you be confusing this with a similar but different fact?
+  3. Is your answer specific enough to fully address the question?
+
+  If you find any issues, provide a corrected answer. If your answer is correct, restate it.
+
+  Question: {question}
+  Your previous answer:
+  {response}
+
+s2_commonsense: |
+  Break down your reasoning:
+  1. List each reasoning step you used.
+  2. Does each step follow logically from the previous one?
+  3. Are there any assumptions that might be wrong?
+  4. Does your final yes/no answer follow from your reasoning?
+
+  If you find any issues, provide a corrected answer (Yes or No). If your answer is correct, restate it.
+
+  Question: {question}
+  Your previous answer:
+  {response}
+
+s2_code: |
+  Review your code carefully:
+  1. Trace through the code with a simple example input.
+  2. Check edge cases (empty input, single element, negative numbers, etc.).
+  3. Verify the return type matches what's expected.
+  4. Look for off-by-one errors, wrong variable names, or missing conditions.
+
+  If you find any errors, provide the corrected code. If your code is correct, restate it.
+
+  Function signature:
+  {question}
+  Your previous code:
+  {response}
+
+# S3 — Iterative (uses S1 prompt repeatedly)
+# No separate prompt needed — reuse s1_simple
+
+# S4 — Confidence elicitation
+s4_confidence: |
+  On a scale of 1 to 10, how confident are you in your previous answer? (1 = very unsure, 10 = completely certain)
+  Respond with just a number.
+
+  Question: {question}
+  Your answer: {response}
+
+# S5 — Explain-Then-Verify (two prompts)
+s5_explain: |
+  Explain your reasoning for the following answer step by step. Be thorough and explicit about each logical step.
+
+  Question: {question}
+  Your answer: {response}
+
+s5_verify: |
+  Based on the reasoning below, is the original answer correct? If not, provide a corrected answer.
+
+  Question: {question}
+  Original answer: {response}
+  Reasoning: {explanation}
+
+# CoT baseline prefix
+cot_prefix: "Let's think step by step.\n\n"

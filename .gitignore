@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*~
+
+# Model weights and large staged data (keep small JSONs in stage1/data/)
+**/datasets/
+**/models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+
+# LoRA adapters / training checkpoints
+**/checkpoints/
+**/adapters/
+
+# Runtime logs (HPC + local)
+**/logs/
+*.log
+*.out
+*.err
+
+# Notebooks output
+*.ipynb_checkpoints/

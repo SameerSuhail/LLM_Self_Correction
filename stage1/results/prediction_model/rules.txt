@@ -1,0 +1,111 @@
+======================================================================
+DECISION FRAMEWORK: When does self-correction help?
+======================================================================
+
+WILL CORRECTION HELP? (predicting W->C)
+----------------------------------------
+|--- confidence <= 0.00
+|   |--- task_type <= 1.50
+|   |   |--- model <= 0.50
+|   |   |   |--- task_type <= 0.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- task_type >  0.50
+|   |   |   |   |--- class: 1
+|   |   |--- model >  0.50
+|   |   |   |--- strategy <= 3.00
+|   |   |   |   |--- class: 0
+|   |   |   |--- strategy >  3.00
+|   |   |   |   |--- class: 1
+|   |--- task_type >  1.50
+|   |   |--- model <= 0.50
+|   |   |   |--- dataset <= 1.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- dataset >  1.50
+|   |   |   |   |--- class: 1
+|   |   |--- model >  0.50
+|   |   |   |--- response_length <= 8.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- response_length >  8.50
+|   |   |   |   |--- class: 0
+|--- confidence >  0.00
+|   |--- confidence <= 3.50
+|   |   |--- confidence <= 1.50
+|   |   |   |--- num_reasoning_steps <= 22.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- num_reasoning_steps >  22.50
+|   |   |   |   |--- class: 1
+|   |   |--- confidence >  1.50
+|   |   |   |--- response_length <= 27.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- response_length >  27.50
+|   |   |   |   |--- class: 1
+|   |--- confidence >  3.50
+|   |   |--- class: 0
+
+
+WILL CORRECTION HURT? (predicting C->W)
+----------------------------------------
+|--- confidence <= 4.50
+|   |--- task_type <= 1.50
+|   |   |--- model <= 1.50
+|   |   |   |--- has_answer_format <= 0.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- has_answer_format >  0.50
+|   |   |   |   |--- class: 1
+|   |   |--- model >  1.50
+|   |   |   |--- strategy <= 1.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- strategy >  1.50
+|   |   |   |   |--- class: 0
+|   |--- task_type >  1.50
+|   |   |--- has_answer_format <= 0.50
+|   |   |   |--- model <= 0.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- model >  0.50
+|   |   |   |   |--- class: 0
+|   |   |--- has_answer_format >  0.50
+|   |   |   |--- response_length <= 730.00
+|   |   |   |   |--- class: 0
+|   |   |   |--- response_length >  730.00
+|   |   |   |   |--- class: 1
+|--- confidence >  4.50
+|   |--- class: 0
+
+
+3-CLASS MODEL (help / neutral / hurt)
+----------------------------------------
+|--- confidence <= 3.50
+|   |--- task_type <= 1.50
+|   |   |--- model <= 0.50
+|   |   |   |--- has_answer_format <= 0.50
+|   |   |   |   |--- class: 1
+|   |   |   |--- has_answer_format >  0.50
+|   |   |   |   |--- class: 1
+|   |   |--- model >  0.50
+|   |   |   |--- strategy <= 3.50
+|   |   |   |   |--- class: -1
+|   |   |   |--- strategy >  3.50
+|   |   |   |   |--- class: 1
+|   |--- task_type >  1.50
+|   |   |--- model <= 0.50
+|   |   |   |--- dataset <= 1.50
+|   |   |   |   |--- class: -1
+|   |   |   |--- dataset >  1.50
+|   |   |   |   |--- class: 1
+|   |   |--- model >  0.50
+|   |   |   |--- response_length <= 730.00
+|   |   |   |   |--- class: 0
+|   |   |   |--- response_length >  730.00
+|   |   |   |   |--- class: -1
+|--- confidence >  3.50
+|   |--- confidence <= 5.50
+|   |   |--- has_answer_format <= 0.50
+|   |   |   |--- class: 0
+|   |   |--- has_answer_format >  0.50
+|   |   |   |--- class: 0
+|   |--- confidence >  5.50
+|   |   |--- confidence <= 6.50
+|   |   |   |--- class: 0
+|   |   |--- confidence >  6.50
+|   |   |   |--- class: 0
+

@@ -1,0 +1,23 @@
+# Initial generation prompts — MUST BE STRONG (Kamoi checklist)
+# These are deployment-quality prompts, not deliberately weak ones.
+
+gsm8k: |
+  Solve the following math problem step by step. Show your work clearly, then provide your final answer on a new line in the format: #### [number]
+
+  Problem: {question}
+
+triviaqa: |
+  Answer the following trivia question. Provide a short, direct answer.
+
+  Question: {question}
+  Answer:
+
+strategyqa: |
+  Answer the following yes/no question. Think through it carefully, then give your final answer as either "Yes" or "No".
+
+  Question: {question}
+
+humaneval: |
+  Complete the following Python function. Only provide the function body (the code that goes after the function signature). Do not repeat the function signature.
+
+  {prompt}

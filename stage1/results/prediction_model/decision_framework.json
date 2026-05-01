@@ -1,0 +1,70 @@
+{
+  "n_samples": 71595,
+  "class_distribution": {
+    "helped": 3124,
+    "neutral": 57941,
+    "hurt": 10530
+  },
+  "help_model": {
+    "cv_accuracy": 0.7570919756966268,
+    "cv_f1": 0.20268957351801625,
+    "feature_importance": {
+      "model": 0.22388308453947736,
+      "dataset": 0.022092520449106156,
+      "strategy": 0.07470538650276785,
+      "task_type": 0.2522038452046803,
+      "response_length": 0.0573023358453222,
+      "num_reasoning_steps": 0.002521429697078976,
+      "has_hedging": 0.0,
+      "has_answer_format": 0.0,
+      "confidence": 0.36729139776156705
+    },
+    "tree_rules": "|--- confidence <= 0.00\n|   |--- task_type <= 1.50\n|   |   |--- model <= 0.50\n|   |   |   |--- task_type <= 0.50\n|   |   |   |   |--- class: 1\n|   |   |   |--- task_type >  0.50\n|   |   |   |   |--- class: 1\n|   |   |--- model >  0.50\n|   |   |   |--- strategy <= 3.00\n|   |   |   |   |--- class: 0\n|   |   |   |--- strategy >  3.00\n|   |   |   |   |--- class: 1\n|   |--- task_type >  1.50\n|   |   |--- model <= 0.50\n|   |   |   |--- dataset <= 1.50\n|   |   |   |   |--- class: 0\n|   |   |   |--- dataset >  1.50\n|   |   |   |   |--- class: 1\n|   |   |--- model >  0.50\n|   |   |   |--- response_length <= 8.50\n|   |   |   |   |--- class: 0\n|   |   |   |--- response_length >  8.50\n|   |   |   |   |--- class: 0\n|--- confidence >  0.00\n|   |--- confidence <= 3.50\n|   |   |--- confidence <= 1.50\n|   |   |   |--- num_reasoning_steps <= 22.50\n|   |   |   |   |--- class: 0\n|   |   |   |--- num_reasoning_steps >  22.50\n|   |   |   |   |--- class: 1\n|   |   |--- confidence >  1.50\n|   |   |   |--- response_length <= 27.50\n|   |   |   |   |--- class: 1\n|   |   |   |--- response_length >  27.50\n|   |   |   |   |--- class: 1\n|   |--- confidence >  3.50\n|   |   |--- class: 0\n"
+  },
+  "hurt_model": {
+    "cv_accuracy": 0.7018227529855436,
+    "cv_f1": 0.4631451776844626,
+    "feature_importance": {
+      "model": 0.10532470082972248,
+      "dataset": 0.0,
+      "strategy": 0.030083621177558043,
+      "task_type": 0.22614305034246288,
+      "response_length": 0.11339682020748422,
+      "num_reasoning_steps": 0.0,
+      "has_hedging": 0.0,
+      "has_answer_format": 0.1873956857307276,
+      "confidence": 0.33765612171204484
+    },
+    "tree_rules": "|--- confidence <= 4.50\n|   |--- task_type <= 1.50\n|   |   |--- model <= 1.50\n|   |   |   |--- has_answer_format <= 0.50\n|   |   |   |   |--- class: 0\n|   |   |   |--- has_answer_format >  0.50\n|   |   |   |   |--- class: 1\n|   |   |--- model >  1.50\n|   |   |   |--- strategy <= 1.50\n|   |   |   |   |--- class: 1\n|   |   |   |--- strategy >  1.50\n|   |   |   |   |--- class: 0\n|   |--- task_type >  1.50\n|   |   |--- has_answer_format <= 0.50\n|   |   |   |--- model <= 0.50\n|   |   |   |   |--- class: 1\n|   |   |   |--- model >  0.50\n|   |   |   |   |--- class: 0\n|   |   |--- has_answer_format >  0.50\n|   |   |   |--- response_length <= 730.00\n|   |   |   |   |--- class: 0\n|   |   |   |--- response_length >  730.00\n|   |   |   |   |--- class: 1\n|--- confidence >  4.50\n|   |--- class: 0\n"
+  },
+  "three_class_model": {
+    "cv_accuracy": 0.5611006355192403,
+    "tree_rules": "|--- confidence <= 3.50\n|   |--- task_type <= 1.50\n|   |   |--- model <= 0.50\n|   |   |   |--- has_answer_format <= 0.50\n|   |   |   |   |--- class: 1\n|   |   |   |--- has_answer_format >  0.50\n|   |   |   |   |--- class: 1\n|   |   |--- model >  0.50\n|   |   |   |--- strategy <= 3.50\n|   |   |   |   |--- class: -1\n|   |   |   |--- strategy >  3.50\n|   |   |   |   |--- class: 1\n|   |--- task_type >  1.50\n|   |   |--- model <= 0.50\n|   |   |   |--- dataset <= 1.50\n|   |   |   |   |--- class: -1\n|   |   |   |--- dataset >  1.50\n|   |   |   |   |--- class: 1\n|   |   |--- model >  0.50\n|   |   |   |--- response_length <= 730.00\n|   |   |   |   |--- class: 0\n|   |   |   |--- response_length >  730.00\n|   |   |   |   |--- class: -1\n|--- confidence >  3.50\n|   |--- confidence <= 5.50\n|   |   |--- has_answer_format <= 0.50\n|   |   |   |--- class: 0\n|   |   |--- has_answer_format >  0.50\n|   |   |   |--- class: 0\n|   |--- confidence >  5.50\n|   |   |--- confidence <= 6.50\n|   |   |   |--- class: 0\n|   |   |--- confidence >  6.50\n|   |   |   |--- class: 0\n"
+  },
+  "encoders": {
+    "model": {
+      "llama": 0,
+      "mistral": 1,
+      "qwen": 2
+    },
+    "dataset": {
+      "gsm8k": 0,
+      "humaneval": 1,
+      "strategyqa": 2,
+      "triviaqa": 3
+    },
+    "strategy": {
+      "s1": 0,
+      "s2": 1,
+      "s3": 2,
+      "s4": 3,
+      "s5": 4
+    },
+    "task_type": {
+      "code": 0,
+      "commonsense": 1,
+      "factual_qa": 2,
+      "math": 3
+    }
+  }
+}
