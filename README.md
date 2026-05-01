@@ -1,53 +1,110 @@
-# Self-Correction Data Generation
+# Second Thoughts: When LLM Self-Correction Helps vs Hurts
 
-Pipeline that produces two SFT datasets (D1 and D2) for teaching an LLM to self-correct mathematical reasoning errors. Built on MetaMathQA, using Mistral-7B as the step generator and DeepSeek-R1 as the judge / supervision generator.
+A three-stage empirical study of LLM self-correction. Course project for **CSCE 638 NLP, Spring 2026, Texas A&M University**, advised by Prof. Kuan-Hao Huang.
 
----
-
-## Error step generation (shared upstream)
-
-For each MetaMathQA example:
-
-1. Sample a gold prefix from the gold solution (1 to half of the steps).
-2. Use Mistral-7B (T=1.2) to draft a candidate next step after the prefix.
-3. Generate 8 rollouts from that candidate (T=0.8).
-4. Verify rollout correctness with symbolic answer extraction; fall back to a DeepSeek-R1 judge.
-5. Label the candidate **wrong** only if **all 8 rollouts produce wrong final answers**.
-
-The all-rollouts-wrong filter selects steps where the base model has *no* recovery path on its own — supervision is non-redundant. A DeepSeek-R1 judge then attributes each wrong step to a single source from `{step_1, step_2, …, question, independent}` — which prior input the model misused when generating the wrong step.
+**Team:** Ashish Molakalapalli, Sameer Suhail, Samhitha Kondeti, Varenya Sri.
 
 ---
 
-## Dataset 1 — single-step self-correction
+## The question
 
-The model is trained to detect and correct an error **at the wrong step itself**.
+Self-correction — asking a model to review its own answer — is everywhere in deployed LLM systems. But the same parameters that produced the answer are now reviewing it. Same training data, same biases, same blind spots. Does it actually work?
 
-For each `(prefix, wrong_step, attribution)` triple, DeepSeek-R1 generates an *error trace* (first-person mid-generation pivot, opener keyed on the attribution source — e.g. "Let me recheck Step 2"), a one-sentence *diagnosis*, and a *corrected step*.
+We ask three sub-questions, in order:
+1. **Does prompting-based correction work, given a fair setup?**
+2. **If not, does training-based correction fix it?**
+3. **Does a math-trained correction recipe transfer to code?**
+
+Each stage corresponds to one folder in this repo.
+
+---
+
+## Headline findings
+
+| Stage | Finding |
+|---|---|
+| **1: Prompting** | Across 96 conditions and 71,595 question–strategy pairs on three open-source 7–8B models, correction broke **14.7%** of correct answers and helped only **4.4%** — a **3.4× damage ratio**. Self-consistency at near-equal compute beats simple-review correction in 11 of 12 conditions. |
+| **2: Training (math)** | LoRA fine-tuning on D1+D2 raises Mistral-7B from 47.61% → **65.43%** on GSM8K (**+17.82**). The attribution signal alone contributes **+2.96** points. |
+| **3: Training (code)** | The same recipe **regresses** on Qwen-2.5-Coder-7B across all three code benchmarks (MBPP −10.27, HumanEval −5.87, Codeforces-A −15.22). External verifiers (the compiler) appear to make intrinsic self-correction supervision counterproductive. |
+
+---
+
+## Repository layout
 
 ```
-USER:      Problem: …\n\nSolve step by step.
-ASSISTANT: {gold prefix}        ← loss computed
-           {wrong step}         ← loss MASKED
-           Error trace: …       ← loss computed
-           Diagnosis: …         ← loss computed
-           Corrected step: …    ← loss computed
-           {continuation to #### N}
+LLM_Self_Correction/
+├── stage1/                     Stage 1: Prompting-based correction
+│   ├── src/                    Inference, evaluation, confidence parser
+│   ├── scripts/                Experiment runners + analysis pipeline
+│   ├── configs/prompts/        S1–S5 prompt templates + initial generation
+│   ├── data/                   Test JSONs (GSM8K, TriviaQA, StrategyQA, HumanEval)
+│   ├── results/                96 raw condition JSONs + aggregated CSVs + decision tree
+│   ├── figures/                Heatmap, calibration curves, etc.
+│   └── README.md               Stage 1 details + reproduction commands
+│
+├── data_generation/            Stage 2: SFT data generation pipeline (D1 + D2)
+├── sft_data/                   Stage 2: Generated D1 and D2 datasets
+├── test_data/                  Stage 2: Held-out evaluation problems
+├── training/                   Stage 2: LoRA fine-tuning configs
+├── generate_wrong_steps.py     Stage 2: Wrong-step generation entrypoint
+│
+├── stage3/                     Stage 3: Code self-correction (coming soon)
+│
+└── README.md                   This file
 ```
 
 ---
 
-## Dataset 2 — multi-step late detection
+## Stage 1 — Prompting-based correction
 
-The model is trained to detect an error **several steps after** the actual mistake, retrace to the origin, and correct from there.
+`stage1/`
 
-Each downstream rollout step is first labeled `propagated` (silently inherits a wrong value, no new mistake) or `new_error` (fresh mistake compounded on top). A detection point is then **randomly sampled** from any downstream step ≥ 1 step after the wrong step — forcing late detection, the realistic deployment scenario. DeepSeek-R1 produces *detection*, *retrace*, *error trace*, *diagnosis*, and a *correction* chain from the origin step through the detection step.
+A controlled **3 × 5 × 4** grid: three open-source 7–8B models (Llama-3.1-8B, Mistral-7B, Qwen-2.5-7B), five correction strategies (S1 simple, S2 structured, S3 iterative, S4 confidence-gated, S5 explain-then-verify), four datasets (GSM8K, TriviaQA, StrategyQA, HumanEval), plus three baselines (no correction, CoT, self-consistency). 96 conditions, 71,595 question–strategy pairs.
 
-```
-USER:      Problem: …\n\nSolve step by step.
-ASSISTANT: {gold prefix}                          ← loss computed
-           {wrong step + downstream to detection} ← loss MASKED (single span)
-           Detection: … / Retrace: …
-           Error trace: … / Diagnosis: …
-           Correction: …                          ← loss computed
-           {continuation to #### N}
-```
+We score every condition with a per-instance correction matrix in the style of Yang et al. (2024) — `C→C`, `C→W`, `W→C`, `W→W` — instead of just before/after accuracy. This exposes regression risk that aggregate accuracy hides.
+
+Built on top of this, a depth-4 decision tree predicts whether correction will help on a given instance with **75.7%** cross-validated accuracy. Top features: confidence (37%), task type (25%), model identity (22%). The most useful single rule: *if self-reported confidence > 4, do not correct.*
+
+See [`stage1/README.md`](stage1/README.md) for the full experimental protocol and reproduction commands.
+
+---
+
+## Stage 2 — Training-based math correction
+
+Root-level folders: `data_generation/`, `sft_data/`, `test_data/`, `training/`, plus `generate_wrong_steps.py`.
+
+Two SFT datasets built from MetaMathQA, using Mistral-7B as the wrong-step generator and DeepSeek-R1-Distill-Qwen-14B as the judge:
+
+- **D1 — single-step self-correction**: model detects and rewrites the wrong step in place. 1,805 valid examples.
+- **D2 — multi-step late detection**: error propagates several steps; model detects late, retraces to the origin, and re-solves forward. 1,571 valid examples.
+
+Both use the **all-rollouts-wrong filter**: a candidate step is kept only if all 8 rollouts past it produce wrong final answers. This selects steps from which the base model has no recovery path on its own — supervision is non-redundant.
+
+LoRA fine-tuning (rank 8, α=16, target modules `{q,k,v,o}_proj`) on the combined D1+D2 set lifts Mistral-7B by +17.82 points on GSM8K. Holding everything else fixed, the **attribution signal** alone — keying the error-trace opener on which prior input was misused — is worth +2.96 points.
+
+---
+
+## Stage 3 — Training-based code correction (coming soon)
+
+`stage3/` (to be added)
+
+We adapt the Stage 2 recipe to code: training Qwen-2.5-Coder-7B-Instruct on CodeContests, with a 14B teacher generating self-correction cycles. Unlike Stage 2, Stage 3 uses only the single-step (D1) format, no multi-step retrace, no attribution signal; LoRA at rank 16 targeting all linear projection layers.
+
+Result: regression on every code benchmark (MBPP −10.27, HumanEval −5.87, Codeforces-A −15.22). We attribute this to (1) instruction conflict with an already heavily code-tuned base, (2) low-rank adapter capacity even at r=16, and (3) the existence of an external verifier (compiler + unit tests) that makes intrinsic self-correction supervision redundant where math has no analog.
+
+---
+
+## Paper
+
+Full writeup in the project report (8-page ACL format). Key references:
+- Self-Refine (Madaan et al., 2023), Reflexion (Shinn et al., 2023), CRITIC (Gou et al., 2024) — prompting baselines we evaluate.
+- Huang et al. (2024) — first counter-result on intrinsic self-correction.
+- Kamoi et al. (2024) — methodology checklist we follow (deployment-quality prompts, compute-matched baselines).
+- Yang et al. (2024) — per-instance correction matrix framework we adopt.
+- Yan et al. (2025) S³C-Math — Stage 2 builds on their step-level supervision recipe.
+
+---
+
+## Cluster
+
+All experiments on TAMU HPRC Grace, A100 40GB GPUs, greedy decoding for correction (T=0), bf16/fp16 weights. Self-Consistency baseline uses T=0.7 with N=3 samples.
