@@ -42,13 +42,15 @@ LLM_Self_Correction/
 │   ├── figures/                Heatmap, calibration curves, etc.
 │   └── README.md               Stage 1 details + reproduction commands
 │
-├── data_generation/            Stage 2: SFT data generation pipeline (D1 + D2)
-├── sft_data/                   Stage 2: Generated D1 and D2 datasets
-├── test_data/                  Stage 2: Held-out evaluation problems
-├── training/                   Stage 2: LoRA fine-tuning configs
-├── generate_wrong_steps.py     Stage 2: Wrong-step generation entrypoint
+├── stage2/                     Stage 2: Training-based math correction
+│   ├── data_generation/        Wrong-step + judge orchestration
+│   ├── generate_wrong_steps.py Wrong-step generation entrypoint
+│   ├── sft_data/               Generated D1 and D2 datasets
+│   ├── test_data/              Held-out evaluation problems
+│   ├── training/               LoRA fine-tuning configs
+│   └── README.md               Stage 2 details (D1, D2, masking scheme)
 │
-├── stage3/                     Stage 3: Code self-correction (coming soon)
+├── stage3/                     Stage 3: Training-based code correction (coming soon)
 │
 └── README.md                   This file
 ```
@@ -71,7 +73,7 @@ See [`stage1/README.md`](stage1/README.md) for the full experimental protocol an
 
 ## Stage 2 — Training-based math correction
 
-Root-level folders: `data_generation/`, `sft_data/`, `test_data/`, `training/`, plus `generate_wrong_steps.py`.
+`stage2/`
 
 Two SFT datasets built from MetaMathQA, using Mistral-7B as the wrong-step generator and DeepSeek-R1-Distill-Qwen-14B as the judge:
 
@@ -81,6 +83,8 @@ Two SFT datasets built from MetaMathQA, using Mistral-7B as the wrong-step gener
 Both use the **all-rollouts-wrong filter**: a candidate step is kept only if all 8 rollouts past it produce wrong final answers. This selects steps from which the base model has no recovery path on its own — supervision is non-redundant.
 
 LoRA fine-tuning (rank 8, α=16, target modules `{q,k,v,o}_proj`) on the combined D1+D2 set lifts Mistral-7B by +17.82 points on GSM8K. Holding everything else fixed, the **attribution signal** alone — keying the error-trace opener on which prior input was misused — is worth +2.96 points.
+
+See [`stage2/README.md`](stage2/README.md) for the full data-generation pipeline and supervision format.
 
 ---
 
