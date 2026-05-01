@@ -95,20 +95,3 @@ See [`stage2/README.md`](stage2/README.md) for the full data-generation pipeline
 We adapt the Stage 2 recipe to code: training Qwen-2.5-Coder-7B-Instruct on CodeContests, with a 14B teacher generating self-correction cycles. Unlike Stage 2, Stage 3 uses only the single-step (D1) format, no multi-step retrace, no attribution signal; LoRA at rank 16 targeting all linear projection layers.
 
 Result: regression on every code benchmark (MBPP −10.27, HumanEval −5.87, Codeforces-A −15.22). We attribute this to (1) instruction conflict with an already heavily code-tuned base, (2) low-rank adapter capacity even at r=16, and (3) the existence of an external verifier (compiler + unit tests) that makes intrinsic self-correction supervision redundant where math has no analog.
-
----
-
-## Paper
-
-Full writeup in the project report (8-page ACL format). Key references:
-- Self-Refine (Madaan et al., 2023), Reflexion (Shinn et al., 2023), CRITIC (Gou et al., 2024) — prompting baselines we evaluate.
-- Huang et al. (2024) — first counter-result on intrinsic self-correction.
-- Kamoi et al. (2024) — methodology checklist we follow (deployment-quality prompts, compute-matched baselines).
-- Yang et al. (2024) — per-instance correction matrix framework we adopt.
-- Yan et al. (2025) S³C-Math — Stage 2 builds on their step-level supervision recipe.
-
----
-
-## Cluster
-
-All experiments on TAMU HPRC Grace, A100 40GB GPUs, greedy decoding for correction (T=0), bf16/fp16 weights. Self-Consistency baseline uses T=0.7 with N=3 samples.
