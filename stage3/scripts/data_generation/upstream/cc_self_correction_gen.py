@@ -1,12 +1,13 @@
 """
 cc_self_correction_gen.py
 
-Reads cc_attribution_comparison.jsonl and generates three new fields per record
-using Qwen2.5-Coder-14B-Instruct:
+Reads cc_attribution_comparison.jsonl and, for each record, fills a JSON object
+``self_correction`` (added to the output line) with string fields written by
+Qwen2.5-Coder-14B-Instruct:
 
-  self_correction.error_trace     — traces the error back to its source using attribution
-  self_correction.error_diagnosis — specific first-person explanation of what went wrong
-  self_correction.corrected_step  — corrected version of the wrong reasoning step
+  "error_trace"     — first-person trace of the mistake (not a Python attribute; JSON key)
+  "error_diagnosis" — one-sentence diagnosis
+  "corrected_step"  — corrected reasoning step line
 
 Output: cc_self_correction_part_{N}.jsonl  (merge into cc_self_correction_sft.jsonl)
 

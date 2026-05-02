@@ -13,8 +13,6 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 def check_correctness(code, prompt, test, entry_point=None, dataset_name=""):
     """Sandboxed execution for HumanEval, MBPP, and CodeContests.
     Returns (bool, str) where str contains execution details.

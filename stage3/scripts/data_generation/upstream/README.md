@@ -6,7 +6,7 @@ These scripts regenerate the **intermediate** JSONL shards from the CodeContests
 |--------|------|
 | `code_contests_data_gen.py` | Sample wrong reasoning steps on CodeContests problems; writes `code_contests_wrong_steps_part_*.jsonl` (use `--part`). |
 | `merge_wrong_steps_parts.py` | One directory level up: merge parts → `code_contests_wrong_steps_all.jsonl` for attribution. |
-| `root_cause_attribution_code.py` | Attribute root cause of each wrong step → `cc_attribution_comparison.jsonl` (default `--input code_contests_wrong_steps_all.jsonl`). |
+| `root_cause_attribution_code.py` | **Stage 3 / CodeContests.** Attribute root cause of each wrong step → `cc_attribution_comparison.jsonl`. Math analogue: `stage2/data_generation/common/root_cause_attribution.py`. |
 | `cc_self_correction_gen.py` | Given attributions, produce `self_correction` fields → `cc_self_correction_part_*.jsonl`. |
 
 Typical order (from an empty working directory on a node with HF + CUDA):

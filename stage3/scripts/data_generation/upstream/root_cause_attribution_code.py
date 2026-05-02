@@ -1,16 +1,33 @@
 """
-root_cause_attribution_code.py
+root_cause_attribution_code.py — Stage 3 (CodeContests / code reasoning)
 
-Adapts the root-cause attribution pipeline (originally for math reasoning) to the
-code contests dataset. Operates on code_contests_wrong_steps_all.jsonl and attributes
-the root cause of each confirmed wrong reasoning step using four strategies:
+This is the **code-domain** root-cause attribution script. It imports
+``code_contests_data_gen`` (same directory). It is **not** Stage 1 (prompting-only).
+
+The **math-domain** twin lives elsewhere in this repo:
+
+  stage2/data_generation/common/root_cause_attribution.py  → imports self_correction_data_gen
+
+Both pipelines share the same high-level strategy layout (S1–S4), but this file uses
+``problem`` / ``gt_solution`` / public-test execution instead of ``question`` /
+numerical answers.
+
+Output schema note: ``attribute_attention`` returns
+``{"attention": {..., "error": <str or None>}}``. The optional string
+``result["attention"]["error"]`` is set when Strategy 4 fails (OOM, empty
+``span_map``, etc.); on success it is ``None``. This is a normal JSON field on the
+attention sub-record, not Stage 1 code and not a chat ``message["content"]`` field.
+
+Operates on ``code_contests_wrong_steps_all.jsonl`` (merge shards first; see
+merge_wrong_steps_parts.py). Attributes the root cause of each confirmed wrong
+reasoning step using four strategies:
 
   Strategy 1 — LLM Judge Attribution   (forced-choice logit scoring, Qwen2.5-Coder-14B)
   Strategy 2 — Counterfactual Omission (--run-omission; most expensive, needs dataset reload)
   Strategy 3 — Identifier Tracing      (regex only; no model calls)
   Strategy 4 — Attention Attribution   (Qwen2.5-Coder-7B forward pass with output_attentions)
 
-Key difference from the math version:
+Key difference from the Stage 2 math script:
   - "question" field → "problem" (competitive programming problem statement)
   - Correctness signal = code execution against public tests (not answer string matching)
   - No gold_answer field; rollout success = passes_tests
@@ -958,6 +975,7 @@ def main():
             print("  S4 Attention...")
             att = attribute_attention(record, gen_model, gen_tokenizer)
             attributions.update(att)
+            # S4 diagnostic: optional string, see module docstring (not Stage 1 / not API "content")
             err = att["attention"].get("error")
             if err:
                 print(f"    => error: {err}")
