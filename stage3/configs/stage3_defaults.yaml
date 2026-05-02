@@ -1,0 +1,44 @@
+# Stage 3 reference hyperparameters (mirror scripts/slurm and training CLIs).
+# All paths are conventions: training data lives in this repo under data/;
+# Hugging Face cache and checkpoints typically use $SCRATCH on clusters.
+
+environment:
+  conda_env: "${SCRATCH}/envs/sft_env"
+  hf_home: "${SCRATCH}/hf_cache"
+  tmpdir: "${SCRATCH}/tmp"
+
+base_model: "Qwen/Qwen2.5-Coder-7B-Instruct"
+
+data:
+  baseline_jsonl: "data/cc_sft_dataset_baseline.jsonl"
+  mixed_lora_jsonl: "data/cc_sft_dataset_qwen_mixed.jsonl"
+
+training_baseline_full_sft:
+  script: "scripts/training/run_baseline.py"
+  slurm: "scripts/slurm/run_baseline_grace.sh"
+  per_device_batch_size: 1
+  gradient_accumulation: 16
+  epochs: 3
+  max_seq_length: 2048
+  learning_rate: 2.0e-5
+  output_dir: "${SCRATCH}/checkpoints/baseline_sft_cc_qwen_fast2x"
+
+training_lora_sft:
+  script: "scripts/training/run_sft.py"
+  slurm: "scripts/slurm/run_sft_grace.sh"
+  lora_r: 16
+  lora_alpha: 32
+  per_device_batch_size: 2
+  gradient_accumulation: 16
+  epochs: 10
+  max_seq_length: 4096
+  learning_rate: 1.0e-4
+  output_dir: "${SCRATCH}/checkpoints/lora_cc_qwen_fast4x"
+
+evaluation:
+  script: "scripts/evaluation/eval_benchmarks.py"
+  max_new_tokens: 1536
+  datasets:
+    - "openai/human-eval"
+    - "mbpp"
+    - "codeforces-a"
